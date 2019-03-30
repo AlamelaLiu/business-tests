@@ -54,18 +54,18 @@ function find_physical_card(){
 	do
 		if [ ! -d "/sys/class/net/${total_network_cards[i]}" ]; then
 			unset total_network_cards[i]
-			total_network_cards=(`echo ${total_network_cards[@]}`)
 		fi	
 	done
+	total_network_cards=(`echo ${total_network_cards[@]}`)
 
 	#去除非目录文件
 	for ((i=0;i<${len_virtual};i++))
 	do
 		if [ ! -d "/sys/devices/virtual/net/${virtual_network_cards[i]}" ]; then
 			unset virtual_network_cards[i]
-			virtual_network_cards=(`echo ${virtual_network_cards[@]}`)
 		fi	
 	done
+	virtual_network_cards=(`echo ${virtual_network_cards[@]}`)
 
 	#去除虚拟网卡
 	for ((i=0;i<${len_total};i++))
