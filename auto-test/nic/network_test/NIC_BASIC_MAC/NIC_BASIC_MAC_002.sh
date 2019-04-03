@@ -23,8 +23,8 @@
 . ../../../../utils/test_case_common.inc
 . ../../../../utils/sys_info.sh
 . ../../../../utils/sh-test-lib
-#. ./utils/error_code.inc
-#. ./utils/test_case_common.inc
+#. ./error_code.inc
+#. ./test_case_common.inc
 #获取脚本名称作为测试用例名称
 test_name=$(basename $0 | sed -e 's/\.sh//')
 #创建log目录
@@ -140,8 +140,8 @@ function verify_network_module(){
 function pre_mac(){
 	for ((i=0;i<${#total_network_cards[@]};i++))
 	do
-		mac[i]=`ifconfig ${total_network_cards[i]} | grep "ether" | awk '{print $2}'`
-		#ethtool -P $net | awk '{print $3}'
+		mac[i]=`ip link show ${total_network_cards[i]} |grep "ether"|awk '{print $2}'`
+		sleep 2
 	done
 	mac=(`echo ${mac[@]}`)
 }
@@ -154,8 +154,8 @@ function pre_mac(){
 function restore_mac(){
 	for ((i=0;i<${#total_network_cards[@]};i++))	
 	do
-		ifconfig ${total_network_cards[i]} hw ether ${mac[i]}
-		
+		ip link set dev ${total_network_cards[i]} address ${mac[i]}
+		sleep 2
 	done
 }
 
@@ -172,20 +172,8 @@ function init_env()
         PRINT_LOG "WARN" " You must be root user " 
         return 1
     fi
-	ifconfig -h
-	if [ $? -eq 0 ]
-	then
-		PRINT_LOG "INFO" " exec<ifconfig -h> is scuccess"
-	else
-		fn_install_pkg "net-tools" 10
-		if [ $? -eq 0 ]
-		then
-			PRINT_LOG "INFO" "install net-tool is scuccess "
-		else
-			PRINT_LOG "FATAL" "install net-tool is fail"
-		fi
-	fi
-	fn_install_pkg "ethtool" 10
+	
+	ethtool -h || fn_install_pkg "ethtool" 10
 	find_physical_card
 	verify_network_module
 	pre_mac
@@ -195,9 +183,6 @@ function init_env()
 }
 
 
-
-
-
 #测试执行
 function test_case()
 {
@@ -205,10 +190,9 @@ function test_case()
 	#给网口配置新的MAC地址
 	for net in ${total_network_cards[@]}
 	do
-		#PRINT_LOG "INFO" "please check this $net port"
-		ifconfig $net hw ether $tmp_mac
-		PRINT_LOG "INFO" " exec<ifconfig $net hw ether $tmp_mac> is scuccess"
-		aft_mac=$(ifconfig  $net |grep "ether"|awk '{print $2}')
+		ip link set dev $net address $tmp_mac
+		sleep 2
+		aft_mac=$(ip link show  $net |grep "ether"|awk '{print $2}')
 		if [ "${tmp_mac}" == "${aft_mac}" ]
 		then 
 			PRINT_LOG "INFO" "$net can set up MAC address."

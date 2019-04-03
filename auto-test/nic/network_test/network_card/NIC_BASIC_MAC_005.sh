@@ -1,5 +1,5 @@
 #!/bin/bash
-set -x
+
 #*****************************************************************************************
 #用例名称：NIC_BASIC_MAC_005
 #用例功能：ethtool查询网口MAC地址
@@ -145,6 +145,7 @@ function init_env()
         PRINT_LOG "WARN" " You must be root user "
         return 1
     fi
+		ethtool -h || fn_install_pkg "ethtool" 10
         find_physical_card
         verify_network_module
     #自定义测试预置条件检查实现部分：比如工具安装，检查多机互联情况，执行用户身份
@@ -165,10 +166,10 @@ function test_case()
 		if [ $? -eq 0 ]
 		then
 			PRINT_LOG "INFO" "$net has MAC address."
-			fn_writeResultFile "${RESULT_FILE}" "$net normal" "pass"
+			fn_writeResultFile "${RESULT_FILE}" "$net query mac" "pass"
 		else
-			PRINT_LOG "FATAL" "$net it can not find MAC address,please check it."
-			fn_writeResultFile "${RESULT_FILE}" "$net no MAC address" "fail"
+			PRINT_LOG "FATAL" "$net it can not find MAC address, please check it."
+			fn_writeResultFile "${RESULT_FILE}" "$net query mac" "fail"
 		fi
     done
 

@@ -93,10 +93,9 @@ function find_physical_card(){
 #************************************************************#
 function check_mac(){
 	ethx=$1
-	#ifconfig $ethx down
 	ip link set dev $ethx down
+	sleep 2
 	pre_mac=$(ethtool -P $ethx | awk '{print $3}');
-	#ifconfig $ethx up
 	ip link set dev $ethx up
 	sleep 2	
 	aft_mac=$(ethtool -P $ethx | awk '{print $3}');
@@ -123,7 +122,8 @@ function init_env()
         PRINT_LOG "WARN" " You must be root user " 
         return 1
     fi
-    	find_physical_card
+	ethtool -h || fn_install_pkg "ethtool" 10
+	find_physical_card
     #自定义测试预置条件检查实现部分：比如工具安装，检查多机互联情况，执行用户身份 
       #需要安装工具，使用公共函数install_deps，用法：install_deps "${pkgs}"
       #需要日志打印，使用公共函数PRINT_LOG，用法：PRINT_LOG "INFO|WARN|FATAL" "xxx"
