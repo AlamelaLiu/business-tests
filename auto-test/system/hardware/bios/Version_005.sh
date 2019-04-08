@@ -45,6 +45,7 @@ function init_env()
 	PRINT_LOG "INFO" "*************************start to run test case<${test_name}>**********************************"
     fn_checkResultFile ${RESULT_FILE}
     ethtool -h || fn_install_pkg ethtool 3
+    ipmitool -h || fn_install_pkg ipmitool 3
 }
 
 
