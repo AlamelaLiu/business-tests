@@ -21,7 +21,7 @@ set -x
 . ../../../../../utils/test_case_common.inc
 . ../../../../../utils/sys_info.sh
 . ../../../../../utils/sh-test-lib
-. ../../../../utils/env_parameter.inc
+. ../../../../../utils/env_parameter.inc
 
 #获取脚本名称作为测试用例名称
 test_name=$(basename $0 | sed -e 's/\.sh//')
@@ -65,7 +65,8 @@ else
     echo "netperf is already installed"
 fi
 
-
+SSH="timeout 1000 sshpass -p root ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" 
+SCP="timeout 1000 sshpass -p root scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
   
 }
 
@@ -111,8 +112,8 @@ netserver
 
 #在对端向本端发包
 path=`pwd`
-sshpass -p root scp $path/install_netperf.sh  root@$tc_ip_172:/root/
-sshpass -p root ssh -p 22 -o StrictHostKeyChecking=no root@$tc_ip_172 "bash install_netperf.sh; netperf -H $sut_ip_172 -t UDP_STREAM –l 30 -- -m 10240; exit"
+$SCP $path/install_netperf.sh  root@$tc_ip_172:/root/
+$SSH root@$tc_ip_172 "bash install_netperf.sh; netperf -H $sut_ip_172 -t UDP_STREAM -l 30 -- -m 10240; exit"
 
 
 #查询网卡在客户端发包后的收包信息
